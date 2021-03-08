@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package post;
+option go_package="/post/postpb";
+
+message Post {
+    string ID = 1;
+    string AuthorID = 2;
+    string Title = 3;
+    string Content = 4;
+}
+
+service Posts {
+    rpc AddPost(Post) returns (Post);
+}

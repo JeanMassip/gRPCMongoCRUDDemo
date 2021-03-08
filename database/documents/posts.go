@@ -2,6 +2,7 @@ package documents
 
 import (
 	"context"
+	"jeanmassip/gRPCMongoCRUDDemo/post/postpb"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -20,9 +21,9 @@ type Post struct {
 }
 
 //InsertOne inserts one post in the database
-func (blog *Post) InsertOne(db mongo.Database) (primitive.ObjectID, error) {
+func (post *Post) InsertOne(db mongo.Database) (primitive.ObjectID, error) {
 	collection := db.Collection(postCollection)
-	result, err := collection.InsertOne(context.Background(), blog)
+	result, err := collection.InsertOne(context.Background(), post)
 	if err != nil {
 		return primitive.NilObjectID, err
 	}
@@ -31,11 +32,11 @@ func (blog *Post) InsertOne(db mongo.Database) (primitive.ObjectID, error) {
 }
 
 //FindOne returns the post with the specified ID from the database
-func (blog *Post) FindOne(db mongo.Database) error {
+func (post *Post) FindOne(db mongo.Database) error {
 	collection := db.Collection(postCollection)
-	filter := bson.M{"_id": blog.ID}
+	filter := bson.M{"_id": post.ID}
 
-	err := collection.FindOne(context.Background(), filter).Decode(blog)
+	err := collection.FindOne(context.Background(), filter).Decode(post)
 	if err != nil {
 		return err
 	}
@@ -50,20 +51,45 @@ func Find(db mongo.Database) (*mongo.Cursor, error) {
 }
 
 //Update updates the specified post within the database
-func (blog *Post) Update(db mongo.Database) error {
+func (post *Post) Update(db mongo.Database) error {
 	collection := db.Collection(postCollection)
 	update := bson.M{
 		"$set": bson.M{
-			"author_id": blog.AuthorID,
-			"title":     blog.Title,
-			"content":   blog.Content,
+			"author_id": post.AuthorID,
+			"title":     post.Title,
+			"content":   post.Content,
 		},
 	}
 
-	_, err := collection.UpdateOne(context.Background(), bson.M{"_id": blog.ID}, update)
+	_, err := collection.UpdateOne(context.Background(), bson.M{"_id": post.ID}, update)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+//FromPostPB parses a post defined by the protobuff into a mongo post document
+func FromPostPB(postProto *postpb.Post) (*Post, error) {
+	oid, err := primitive.ObjectIDFromHex(postProto.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Post{
+		ID:       oid,
+		AuthorID: postProto.AuthorID,
+		Title:    postProto.Title,
+		Content:  postProto.Content,
+	}, nil
+}
+
+//ToPostPB parses a mongo post document into a post defined by the protobuff
+func (post *Post) ToPostPB() *postpb.Post {
+	return &postpb.Post{
+		ID:       post.ID.Hex(),
+		AuthorID: post.AuthorID,
+		Title:    post.Title,
+		Content:  post.Content,
+	}
 }
