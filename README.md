@@ -1,2 +1,2 @@
 # gRPCMongoCRUDDemo
-A simple CRUD example using the mongodb and the gRPC framework
+A simple CRUD example using mongodb and the gRPC framework
