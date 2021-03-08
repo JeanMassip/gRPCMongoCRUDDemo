@@ -45,7 +45,7 @@ func main() {
 		db: database.NewMongoConnection(),
 	}
 
-	err = postServer.db.ConnectToDB("mongodb+srv://jeanM:jeanM@cluster0.xb3jc.mongodb.net/?retryWrites=true&w=majority", "posts")
+	err = postServer.db.ConnectToDB("mongodb+srv://<user>:<passwd>@<server>", "posts")
 	if err != nil {
 		log.Fatalf("Unable to connect to db : %v", err)
 	}
